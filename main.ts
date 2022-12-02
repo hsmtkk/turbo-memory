@@ -41,6 +41,14 @@ class MyStack extends TerraformStack {
       name: `source-${project}`,      
     });
 
+    const storage_service_account = new google.dataGoogleStorageProjectServiceAccount.DataGoogleStorageProjectServiceAccount(this, 'storage-service-account');
+
+    new google.projectIamMember.ProjectIamMember(this, 'storage-account-pubsub', {
+      member: `serviceAccount:${storage_service_account.emailAddress}`,
+      project,
+      role: 'roles/pubsub.publisher',
+    });
+
     // extract
 
     const extract_asset = new TerraformAsset(this, 'extract-asset', {
@@ -113,7 +121,7 @@ class MyStack extends TerraformStack {
       },
       eventTrigger: {
         eventType: 'google.cloud.pubsub.topic.v1.messagePublished',
-        pubsubTopic: result_topic.name,
+        pubsubTopic: result_topic.id,
       },
       location: region,
       name: 'ocr-save',
@@ -153,7 +161,7 @@ class MyStack extends TerraformStack {
       },
       eventTrigger: {
         eventType: 'google.cloud.pubsub.topic.v1.messagePublished',
-        pubsubTopic: translate_topic.name,
+        pubsubTopic: translate_topic.id,
       },
       location: region,
       name: 'ocr-translate',
