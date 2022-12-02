@@ -1,18 +1,21 @@
 package extract
 
 import (
-	"fmt"
-	"net/http"
+	"context"
+	"log"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
+	"github.com/cloudevents/sdk-go/v2/event"
 )
 
 func init() {
-	functions.HTTP("extract", extract)
+	functions.CloudEvent("extract", extract)
 }
 
-func extract(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, World!")
+func extract(ctx context.Context, evt event.Event) error {
+	log.Println("extract")
+	log.Printf("%v\n", evt)
+	return nil
 }
 
 /*
