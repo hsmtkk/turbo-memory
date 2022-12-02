@@ -2,7 +2,9 @@ package extract
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
@@ -12,9 +14,26 @@ func init() {
 	functions.CloudEvent("extract", extract)
 }
 
+// https://cloud.google.com/functions/docs/tutorials/storage?hl=ja#object_finalize_deploying_the_function
+
+type StorageObjectData struct {
+	Bucket         string    `json:"bucket,omitempty"`
+	Name           string    `json:"name,omitempty"`
+	Metageneration int64     `json:"metageneration,string,omitempty"`
+	TimeCreated    time.Time `json:"timeCreated,omitempty"`
+	Updated        time.Time `json:"updated,omitempty"`
+}
+
 func extract(ctx context.Context, evt event.Event) error {
 	log.Println("extract")
 	log.Printf("%v\n", evt)
+
+	var data StorageObjectData
+	if err := evt.DataAs(&data); err != nil {
+		return fmt.Errorf("event.Event.DataAs failed; %w", err)
+	}
+	log.Printf("%v\n", data)
+
 	return nil
 }
 
