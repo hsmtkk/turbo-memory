@@ -23,7 +23,7 @@ class MyStack extends TerraformStack {
       name: `image-bucket-${project}`,
     });
 
-    new google.storageBucket.StorageBucket(this, 'result-bucket', {
+    const result_bucket = new google.storageBucket.StorageBucket(this, 'result-bucket', {
       location: region,
       name: `result-bucket-${project}`,
     });
@@ -71,14 +71,15 @@ class MyStack extends TerraformStack {
           attribute: 'bucket',
           value: image_bucket.name,
         }],
+        triggerRegion: region,
       },
       location: region,
       name: 'ocr-extract',
       serviceConfig: {
         environmentVariables: {
           'GCP_PROJECT': project,
-          'TRANSLATE_TOPIC': 'translate',
-          'RESULT_TOPIC': 'result',
+          'TRANSLATE_TOPIC': translate_topic.name,
+          'RESULT_TOPIC': result_topic.name,
           'TO_LANG': 'es,en,fr,ja',
         },
         minInstanceCount: 0,
@@ -118,7 +119,7 @@ class MyStack extends TerraformStack {
       serviceConfig: {
         environmentVariables: {
           'GCP_PROJECT': project,
-          'RESULT_BUCKET': 'result',
+          'RESULT_BUCKET': result_bucket.name,
         },
         minInstanceCount: 0,
         maxInstanceCount: 1,
@@ -157,7 +158,7 @@ class MyStack extends TerraformStack {
       serviceConfig: {
         environmentVariables: {
           'GCP_PROJECT': project,
-          'RESULT_TOPIC': 'result',
+          'RESULT_TOPIC': result_topic.name,
         },
         minInstanceCount: 0,
         maxInstanceCount: 1,
