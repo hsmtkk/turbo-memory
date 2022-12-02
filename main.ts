@@ -18,13 +18,6 @@ class MyStack extends TerraformStack {
       region,
     });
 
-    const services = ['cloudfunctions'];
-    for(const service of services){
-      new google.projectService.ProjectService(this, `enable-${service}`, {
-        service: `${service}.googleapis.com`,
-      });
-    }
-
     const buckets = ['image', 'result']
     for(const bucket of buckets){
       new google.storageBucket.StorageBucket(this, `${bucket}-bucket`, {
