@@ -18,20 +18,23 @@ class MyStack extends TerraformStack {
       region,
     });
 
-    const buckets = ['image', 'result']
-    for(const bucket of buckets){
-      new google.storageBucket.StorageBucket(this, `${bucket}-bucket`, {
-        location: region,
-        name: `${bucket}-${project}`,
-      });
-    }
+    const image_bucket = new google.storageBucket.StorageBucket(this, 'image-bucket', {
+      location: region,
+      name: `image-bucket-${project}`,
+    });
 
-    const topics = ['translate', 'result']
-    for(const topic of topics){
-      new google.pubsubTopic.PubsubTopic(this, `${topic}-topic`, {
-        name: topic,
-      });
-    }
+    new google.storageBucket.StorageBucket(this, 'result-bucket', {
+      location: region,
+      name: `result-bucket-${project}`,
+    });
+
+    const translate_topic = new google.pubsubTopic.PubsubTopic(this, 'translate-topic', {
+      name: 'translate',
+    });
+
+    const result_topic = new google.pubsubTopic.PubsubTopic(this, 'result-topic', {
+      name: 'result',
+    });
 
     const source_bucket = new google.storageBucket.StorageBucket(this, 'source-bucket', {
       location: region,
@@ -61,6 +64,13 @@ class MyStack extends TerraformStack {
             object: extract_object.name,
           },          
         },
+      },
+      eventTrigger: {
+        eventType: 'google.cloud.storage.object.v1.finalized',
+        eventFilters: [{
+          attribute: 'bucket',
+          value: image_bucket.name,
+        }],
       },
       location: region,
       name: 'ocr-extract',
@@ -100,6 +110,9 @@ class MyStack extends TerraformStack {
           },          
         },
       },
+      eventTrigger: {
+        pubsubTopic: result_topic.name,
+      },
       location: region,
       name: 'ocr-save',
       serviceConfig: {
@@ -135,6 +148,9 @@ class MyStack extends TerraformStack {
             object: translate_object.name,
           },          
         },
+      },
+      eventTrigger: {
+        pubsubTopic: translate_topic.name,
       },
       location: region,
       name: 'ocr-translate',
