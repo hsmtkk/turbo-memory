@@ -112,6 +112,7 @@ class MyStack extends TerraformStack {
         },
       },
       eventTrigger: {
+        eventType: 'google.cloud.pubsub.topic.v1.messagePublished',
         pubsubTopic: result_topic.name,
       },
       location: region,
@@ -151,6 +152,7 @@ class MyStack extends TerraformStack {
         },
       },
       eventTrigger: {
+        eventType: 'google.cloud.pubsub.topic.v1.messagePublished',
         pubsubTopic: translate_topic.name,
       },
       location: region,
