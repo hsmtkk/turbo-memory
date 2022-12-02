@@ -1,0 +1,43 @@
+---
+steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: extract
+    waitFor: ['-']
+    entrypoint: gcloud
+    args:
+      - functions
+      - deploy
+      - ocr-extract
+      - --region
+      - ${_REGION}
+      - --source
+      - extract
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: save
+    waitFor: ['-']
+    entrypoint: gcloud
+    args:
+      - functions
+      - deploy
+      - ocr-save
+      - --region
+      - ${_REGION}
+      - --source
+      - save
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: translate
+    waitFor: ['-']
+    entrypoint: gcloud
+    args:
+      - functions
+      - deploy
+      - ocr-translate
+      - --region
+      - ${_REGION}
+      - --source
+      - translate
+
+substitutions:
+  _REGION: asia-northeast1
