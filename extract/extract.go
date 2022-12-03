@@ -2,6 +2,7 @@ package extract
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -46,6 +47,12 @@ func extract(ctx context.Context, evt event.Event) error {
 	return nil
 }
 
+type message struct {
+	Text     string `json:"text"`
+	FileName string `json:"filename"`
+	Lang     string `json:"lang"`
+}
+
 func detectText(ctx context.Context, bucket, name string) error {
 	texts, err := callVision(ctx, bucket, name)
 	if err != nil {
@@ -62,15 +69,21 @@ func detectText(ctx context.Context, bucket, name string) error {
 	text := strings.Join(texts, " ")
 
 	for _, lang := range langs {
-		attrs := map[string]string{
-			"text":     text,
-			"filename": name,
-			"lang":     lang,
+		msg := message{
+			Text:     text,
+			FileName: name,
+			Lang:     lang,
 		}
-		if err := publishData(ctx, projectID, topic, attrs); err != nil {
+		msgBytes, err := json.Marshal(msg)
+		if err != nil {
+			log.Printf("json.Marshal failed; %v", err.Error())
+			continue
+		}
+		if err := publishData(ctx, projectID, topic, msgBytes); err != nil {
 			log.Printf("publishData failed; %v", err.Error())
+			continue
 		}
-		log.Printf("published: %v\n", attrs)
+		log.Printf("published: %v\n", string(msgBytes))
 	}
 
 	return nil
@@ -118,7 +131,7 @@ func callTranslate(ctx context.Context, texts []string) error {
 	return nil
 }
 
-func publishData(ctx context.Context, projectID, topicName string, attrs map[string]string) error {
+func publishData(ctx context.Context, projectID, topicName string, msgBytes []byte) error {
 	clt, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient failed; %w", err)
@@ -126,8 +139,7 @@ func publishData(ctx context.Context, projectID, topicName string, attrs map[str
 	defer clt.Close()
 	topic := clt.Topic(topicName)
 	result := topic.Publish(ctx, &pubsub.Message{
-		Data:       []byte("extract"),
-		Attributes: attrs,
+		Data: msgBytes,
 	})
 	id, err := result.Get(ctx)
 	if err != nil {

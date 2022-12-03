@@ -31,6 +31,7 @@ func save(ctx context.Context, evt event.Event) error {
 	if err := evt.DataAs(&msg); err != nil {
 		return fmt.Errorf("event.Event.DataAs failed; %w", err)
 	}
+	log.Println("decoded")
 	log.Printf("%v\n", msg)
 
 	return nil
