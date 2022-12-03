@@ -38,7 +38,7 @@ func translate(ctx context.Context, evt event.Event) error {
 		return fmt.Errorf("event.Event.DataAs failed; %w", err)
 	}
 	log.Println("decoded")
-	log.Printf("%v\n", msg)
+	log.Printf("%v\n", string(msg))
 
 	return nil
 }
