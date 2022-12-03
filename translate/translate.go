@@ -91,6 +91,7 @@ func callTranslate(ctx context.Context, text, lang string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("translate.NewClient failed; %w", err)
 	}
+	defer transClient.Close()
 	translated, err := transClient.Translate(ctx, []string{text}, langTag, &googletranslate.Options{Format: googletranslate.Text})
 	if err != nil {
 		return "", fmt.Errorf("translate.Client.DetectLanguage failed; %w", err)

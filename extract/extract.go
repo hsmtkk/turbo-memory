@@ -94,6 +94,7 @@ func callVision(ctx context.Context, bucket, name string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("vision.NewImageAnnotatorClient failed; %w", err)
 	}
+	defer visionClt.Close()
 	url := fmt.Sprintf("gs://%s/%s", bucket, name)
 	img := vision.NewImageFromURI(url)
 	annotations, err := visionClt.DetectTexts(ctx, img, nil, 10)
@@ -113,6 +114,7 @@ func callTranslate(ctx context.Context, texts []string) error {
 	if err != nil {
 		return fmt.Errorf("translate.NewClient failed; %w", err)
 	}
+	defer transClient.Close()
 	detections, err := transClient.DetectLanguage(ctx, texts)
 	if err != nil {
 		return fmt.Errorf("translate.Client.DetectLanguage failed; %w", err)
