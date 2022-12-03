@@ -60,6 +60,7 @@ func save(ctx context.Context, evt event.Event) error {
 
 	obj := clt.Bucket(bucket).Object(newFileName)
 	writer := obj.NewWriter(ctx)
+	defer writer.Close()
 	if _, err := writer.Write([]byte(transMsg.Text)); err != nil {
 		return fmt.Errorf("storage.Writer.Write failed; %w", err)
 	}
